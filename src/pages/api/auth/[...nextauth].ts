@@ -11,6 +11,9 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        // Log input credentials for debugging
+        console.log('Attempting login with credentials:', credentials);
+        
         if (credentials?.email === 'superadmin@gmail.com' && credentials?.password === 'password') {
           return {
             id: '1',
@@ -18,6 +21,8 @@ export const authOptions: NextAuthOptions = {
             email: 'superadmin@gmail.com',
           };
         }
+        
+        console.log('Login failed for:', credentials?.email);
         return null;
       },
     }),
@@ -32,20 +37,21 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // Ensure the user object is passed correctly in the token
         token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
+      // Attach the user object from the token to the session
       session.user = token;
       return session;
     },
   },
-  secret: process.env.AUTH_SECRET,
+  // Ensure secret is properly set and use NEXTAUTH_SECRET in production
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Definisikan NextAuth dalam variabel terlebih dahulu
 const authHandler = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
 
-// Ekspor handler sebagai default
 export default authHandler;
